@@ -5,58 +5,175 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CipherChat</title>
 <style>
-  :root{--bg:#0b1014;--panel:#121a21;--line:#1f2b34;--txt:#e6edf3;--mut:#8b9aa7;--acc:#10b981;--me:#0f6b55;--warn:#f5b942}
+  :root{--bg:#0a0f13;--panel:#111a20;--panel2:#16222a;--line:#1f2d37;--txt:#e6edf3;--mut:#8b9aa7;--acc:#10b981;--accd:#0d9668;--me:#0f6b55;--warn:#f5b942;--bad:#ef4444}
   *{box-sizing:border-box}
-  body{margin:0;height:100vh;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;width:min(380px,92vw)}
-  h1{margin:0 0 4px;font-size:22px} p.sub{margin:0 0 18px;color:var(--mut);font-size:14px}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center}
   input,select,button{font:inherit;color:var(--txt);background:#0d141a;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
   input:focus,select:focus{outline:none;border-color:var(--acc)}
-  button{cursor:pointer} button.primary{background:var(--acc);color:#04130d;font-weight:600;border:none}
-  label{display:block;font-size:12px;color:var(--mut);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em}
+  button{cursor:pointer}
+  button.primary{background:var(--accd);border:none;font-weight:600;color:#fff}
+  button.primary:hover{background:var(--acc)}
+  .hidden{display:none!important}
+
+  /* login */
+  #login{width:min(430px,94vw);max-height:98vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px}
+  .logo{width:60px;height:60px;border-radius:16px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;box-shadow:0 0 24px #10b98155}
+  #login h1{text-align:center;margin:0;font-size:24px}
+  #login .sub{text-align:center;color:var(--mut);margin:4px 0 12px;font-size:14px}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#0d141a}
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--warn)}
+  .badge.ok{color:var(--acc)} .badge.ok .dot{background:var(--acc)}
+  .badge.bad{color:var(--bad)} .badge.bad .dot{background:var(--bad)}
+  .center{text-align:center}
+  .box{border:1px solid var(--line);background:#0d141a;border-radius:12px;padding:12px;margin:14px 0}
+  .box .t{font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .seg button{background:transparent;border:1px solid transparent}
+  .seg button.on{background:var(--accd);color:#fff;font-weight:600}
+  .url{font-size:11px;color:var(--mut);margin-top:8px;word-break:break-all}
+  label.l{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.05em}
   .full{width:100%}
-  #app{display:none;width:min(1000px,98vw);height:94vh;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;grid-template-columns:230px 1fr}
-  aside{border-right:1px solid var(--line);padding:16px;overflow:auto}
-  aside h3{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px}
-  .user{padding:6px 0;font-size:14px}.user::before{content:"● ";color:var(--acc)}
-  main{display:flex;flex-direction:column;min-width:0}
-  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
-  .bar input{width:130px}
-  .bar label{margin:0}
-  #log{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
-  .sys{align-self:center;font-size:12px;color:var(--mut);background:#0d141a;padding:4px 12px;border-radius:99px}
-  .msg{max-width:75%;padding:8px 12px;border-radius:12px;background:#1a252e;word-wrap:break-word}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center;font-size:12px;color:var(--mut)}
+  .chip{padding:5px 10px;border-radius:8px;font-size:12px;color:var(--acc)}
+  #err{color:var(--bad);font-size:13px;min-height:18px;margin-top:8px}
+  .foot{text-align:center;color:var(--mut);font-size:12px;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+
+  /* app */
+  #app{width:min(1150px,98vw);height:95vh;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;grid-template-columns:320px 1fr}
+  aside{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+  .me{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--panel2)}
+  .av{position:relative;width:42px;height:42px;border-radius:50%;background:var(--accd);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+  .av.sm{width:38px;height:38px}
+  .av .on{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:var(--acc);border:2px solid var(--panel)}
+  .grow{flex:1;min-width:0}
+  .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .st{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .st.g{color:var(--acc)}
+  .ib{background:transparent;border:none;padding:8px;font-size:18px;color:var(--mut)}
+  .ib:hover{color:var(--txt)}
+  .item{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;border-left:3px solid transparent}
+  .item:hover{background:#16222a}
+  .item.active{background:#1b2a33;border-left-color:var(--acc)}
+  .unread{background:var(--acc);color:#04130d;font-size:11px;font-weight:700;border-radius:99px;min-width:20px;text-align:center;padding:2px 6px}
+  .you{font-size:10px;color:var(--acc);background:#10b9811f;padding:2px 6px;border-radius:5px}
+  .search{padding:10px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .search input{width:100%;border-radius:99px}
+  .sect{font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;display:flex;justify-content:space-between}
+  #ulist{overflow:auto;flex:1}
+
+  main{display:flex;flex-direction:column;min-width:0;min-height:0}
+  .head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .head .back{display:none}
+  .hr{display:flex;gap:8px;align-items:center}
+  .hr .badge{padding:4px 10px}
+  .cbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut)}
+  .cbar select,.cbar input{padding:6px 10px;font-size:13px}
+  .cbar input{width:120px}
+  #log{flex:1;overflow:auto;padding:14px 18px;display:flex;flex-direction:column;gap:6px;background-image:radial-gradient(#1b2830 1px,transparent 1px);background-size:20px 20px}
+  .day{align-self:center;font-size:11px;color:var(--mut);background:#16222a;padding:3px 12px;border-radius:6px;margin:4px 0}
+  .sys{align-self:center;font-size:12px;color:var(--mut);background:#16222a;border:1px solid var(--line);padding:4px 12px;border-radius:99px}
+  .sys small{margin-left:6px;opacity:.7}
+  .banner{align-self:center;font-size:12px;color:var(--warn);background:#16222a;border:1px solid var(--line);padding:5px 14px;border-radius:8px}
+  .msg{max-width:72%;padding:8px 12px;border-radius:12px;background:#1b2832;word-wrap:break-word}
   .msg.me{align-self:flex-end;background:var(--me)}
-  .msg .who{font-size:12px;color:var(--acc);margin-bottom:2px}
+  .msg .who{font-size:12px;color:var(--acc);margin-bottom:2px;font-weight:600}
   .msg .wire{display:none;margin-top:6px;padding-top:6px;border-top:1px dashed #ffffff30;font:12px ui-monospace,monospace;color:var(--warn);word-break:break-all}
   body.showwire .msg .wire{display:block}
-  .msg .time{font-size:10px;color:var(--mut);text-align:right}
-  #typing{height:18px;padding:0 16px;font-size:12px;color:var(--mut)}
-  .send{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
-  .send input{flex:1}
-  #preview{padding:0 16px 8px;font:12px ui-monospace,monospace;color:var(--warn);min-height:20px}
-  @media(max-width:700px){#app{grid-template-columns:1fr}aside{display:none}}
+  .msg .time{font-size:10px;color:#b4c0ca99;text-align:right;margin-top:2px}
+  #typing{min-height:18px;padding:0 18px;font-size:12px;color:var(--mut)}
+  #preview{padding:0 18px 6px;font:12px ui-monospace,monospace;color:var(--warn);min-height:18px;word-break:break-all}
+  .send{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:var(--panel2)}
+  .send input{flex:1;border-radius:99px;padding:11px 16px}
+  .send button{border-radius:99px;padding:0 22px}
+
+  @media(max-width:760px){
+    #app{grid-template-columns:1fr;height:100vh;width:100vw;border-radius:0}
+    main{display:none}
+    body.inchat aside{display:none}
+    body.inchat main{display:flex}
+    .head .back{display:block}
+    .hr .badge.be{display:none}
+  }
 </style>
 </head>
 <body>
-<div class="card" id="login">
-  <h1>🔐 CipherChat</h1>
-  <p class="sub">Chat where every message is encrypted with a substitution cipher before it leaves your device.</p>
-  <label>Username</label><input class="full" id="name" placeholder="e.g. Rahul" maxlength="20">
-  <label>Cipher</label>
-  <select class="full" id="cipherL"><option value="caesar">Caesar (shift number)</option><option value="vigenere">Vigenère (keyword)</option><option value="mono">Monoalphabetic (keyword)</option></select>
-  <label>Shared secret key</label><input class="full" id="keyL" placeholder="e.g. 5 or SECRET">
-  <br><br><button class="primary full" id="join">Join chat</button>
-  <p class="sub" style="margin-top:14px;font-size:12px">Both people must use the same cipher and key, otherwise messages decrypt to gibberish.</p>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="logo">🔐</div>
+  <h1>CipherChat</h1>
+  <p class="sub">Real-time college chat with substitution-cipher encryption</p>
+  <div class="center"><span class="badge" id="lstatus"><span class="dot"></span><span id="lstatusT">Connecting…</span></span></div>
+
+  <div class="box">
+    <div class="t">Backend server</div>
+    <div class="seg">
+      <button id="bRender" class="on">🌐 Render Cloud</button>
+      <button id="bLocal">💻 Local</button>
+    </div>
+    <div class="url" id="burl"></div>
+  </div>
+
+  <label class="l">Choose your username</label>
+  <input class="full" id="name" placeholder="e.g. Shlok or Rahul" maxlength="20" autocomplete="off">
+  <div class="chips">Quick fill for testing:
+    <button class="chip" data-n="Shlok">+ Shlok</button>
+    <button class="chip" data-n="Rahul">+ Rahul</button>
+    <button class="chip" data-n="Priya">+ Priya</button>
+    <button class="chip" data-n="Aman">+ Aman</button>
+  </div>
+
+  <div class="row2">
+    <div><label class="l">Cipher</label>
+      <select class="full" id="cipherL">
+        <option value="caesar">Caesar (number)</option>
+        <option value="vigenere">Vigenère (word)</option>
+        <option value="mono">Monoalphabetic (word)</option>
+      </select></div>
+    <div><label class="l">Shared secret key</label><input class="full" id="keyL" placeholder="5 or SECRET" value="5"></div>
+  </div>
+  <div id="err"></div>
+  <button class="primary full" id="join" style="padding:13px">Join Chat Room</button>
+  <div class="foot">⚡ Socket.IO over TCP • Substitution cipher encrypts before sending</div>
 </div>
 
-<div id="app">
-  <aside><h3>Online</h3><div id="users"></div></aside>
+<!-- APP -->
+<div id="app" class="hidden">
+  <aside>
+    <div class="me">
+      <div class="av"><span id="meAv">?</span><span class="on"></span></div>
+      <div class="grow"><div class="nm"><span id="meName"></span> <span style="color:var(--acc);font-weight:400;font-size:13px">(You)</span></div><div class="st g">● Active now</div></div>
+      <button class="ib" id="logout" title="Logout">⎋</button>
+    </div>
+    <div class="item active" id="mainItem">
+      <div class="av sm" style="font-size:18px">💬</div>
+      <div class="grow"><div class="nm">Main Room</div><div class="st" id="mainSub">Group chat</div></div>
+      <span class="unread hidden" id="mainUnread">0</span>
+    </div>
+    <div class="search"><input id="search" placeholder="🔍 Search users for DM…" autocomplete="off"></div>
+    <div class="sect"><span>Online — click to DM</span><span id="ucount">0</span></div>
+    <div id="ulist"></div>
+  </aside>
+
   <main>
-    <div class="bar">
+    <div class="head">
+      <button class="ib back" id="back">←</button>
+      <div class="av sm" id="hAv" style="font-size:18px">💬</div>
+      <div class="grow"><div class="nm" id="hName">Main Room</div><div class="st" id="hSub"></div></div>
+      <div class="hr">
+        <span class="badge be" id="beBadge">🌐 Render</span>
+        <span class="badge" id="cstatus"><span class="dot"></span><span id="cstatusT">Connecting</span></span>
+        <button class="ib" id="wireBtn" title="Show ciphertext (what the server sees)">🔒</button>
+        <button class="ib" id="clearBtn" title="Clear this chat">🗑</button>
+      </div>
+    </div>
+    <div class="cbar">
+      Cipher
       <select id="cipher"><option value="caesar">Caesar</option><option value="vigenere">Vigenère</option><option value="mono">Monoalphabetic</option></select>
-      <input id="key" placeholder="key">
-      <label><input type="checkbox" id="wire"> Show ciphertext (what the server sees)</label>
+      Key <input id="key" placeholder="key">
+      <span id="wireHint">· click 🔒 to show ciphertext</span>
     </div>
     <div id="log"></div>
     <div id="typing"></div>
@@ -65,110 +182,233 @@
   </main>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-// Apply fn to letters only (keeps case, digits, punctuation, spaces)
-function mapLetters(text, fn){
+/* ============ SUBSTITUTION CIPHERS ============ */
+const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const mod=(n,m)=>((n%m)+m)%m;
+function mapLetters(text,fn){           // letters only; keeps case, digits, punctuation
   return [...text].map(c=>{
     const u=c.toUpperCase(), i=A.indexOf(u);
     if(i<0) return c;
     const r=fn(i);
-    return c===u ? r : r.toLowerCase();
+    return c===u?r:r.toLowerCase();
   }).join('');
 }
-const mod = (n,m)=>((n%m)+m)%m;
-
-function keyedAlphabet(word){
-  const seen=[...(word.toUpperCase().replace(/[^A-Z]/g,'')+A)];
-  return [...new Set(seen)].join('');
-}
-const CIPHERS = {
-  caesar: {
-    enc:(t,k)=>{const s=parseInt(k)||0; return mapLetters(t,i=>A[mod(i+s,26)]);},
-    dec:(t,k)=>{const s=parseInt(k)||0; return mapLetters(t,i=>A[mod(i-s,26)]);}
-  },
-  vigenere: {
-    enc:(t,k)=>vig(t,k,1), dec:(t,k)=>vig(t,k,-1)
-  },
-  mono: {
-    enc:(t,k)=>{const K=keyedAlphabet(k); return mapLetters(t,i=>K[i]);},
-    dec:(t,k)=>{const K=keyedAlphabet(k); return mapLetters(t,i=>A[K.indexOf(A[i])]);}
-  }
-};
 function vig(t,k,sign){
   k=k.toUpperCase().replace(/[^A-Z]/g,'');
   if(!k) return t;
   let j=0;
   return mapLetters(t,i=>A[mod(i+sign*(k.charCodeAt(j++%k.length)-65),26)]);
 }
-
-const $=id=>document.getElementById(id);
-const socket = io();
-let me='';
-
-$('join').onclick=()=>{
-  me=$('name').value.trim();
-  if(!me) return $('name').focus();
-  $('cipher').value=$('cipherL').value;
-  $('key').value=$('keyL').value;
-  $('login').style.display='none';
-  $('app').style.display='grid';
-  socket.emit('join', me);
-  $('text').focus();
+const keyedAlphabet=w=>[...new Set([...(w.toUpperCase().replace(/[^A-Z]/g,'')+A)])].join('');
+const CIPHERS={
+  caesar:{enc:(t,k)=>{const s=parseInt(k)||0;return mapLetters(t,i=>A[mod(i+s,26)]);},
+          dec:(t,k)=>{const s=parseInt(k)||0;return mapLetters(t,i=>A[mod(i-s,26)]);}},
+  vigenere:{enc:(t,k)=>vig(t,k,1),dec:(t,k)=>vig(t,k,-1)},
+  mono:{enc:(t,k)=>{const K=keyedAlphabet(k);return mapLetters(t,i=>K[i]);},
+        dec:(t,k)=>{const K=keyedAlphabet(k);return mapLetters(t,i=>A[K.indexOf(A[i])]);}}
 };
 
-function addMsg(user, plain, wireText, mine, t){
-  const d=document.createElement('div');
-  d.className='msg'+(mine?' me':'');
-  const time=new Date(t||Date.now()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  d.innerHTML = (mine?'':'<div class="who"></div>')+'<div class="body"></div><div class="wire"></div><div class="time">'+time+'</div>';
-  if(!mine) d.querySelector('.who').textContent=user;
-  d.querySelector('.body').textContent=plain;
-  d.querySelector('.wire').textContent='🔒 '+wireText;
-  $('log').appendChild(d); $('log').scrollTop=1e9;
+/* ============ BACKENDS ============ */
+// Edit these two if your URLs differ.
+const RENDER_URL='https://cipherchat-sarthak.onrender.com';
+const LOCAL_URL='http://localhost:3000';
+const isLocalHost=/^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
+const urlFor=b=>b==='render'
+  ?(location.hostname.endsWith('onrender.com')?location.origin:RENDER_URL)
+  :(isLocalHost?location.origin:LOCAL_URL);
+let backend=isLocalHost?'local':'render';
+
+/* ============ STATE ============ */
+const $=id=>document.getElementById(id);
+let socket=null, me='', users=[];
+const chats={main:{name:'Main Room',msgs:[],unread:0}};
+let active='main';
+const ck=n=>n?'dm:'+n.toLowerCase():'main';
+const chatOf=(k,name)=>chats[k]||(chats[k]={name:name||'',msgs:[],unread:0});
+const fmt=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const beName=()=>backend==='render'?'Render Cloud':'Local';
+
+/* ============ CONNECTION ============ */
+function setStatus(state){
+  const txt={ok:'Connected ('+beName()+')',wait:'Connecting… server may be waking up',bad:'Disconnected'}[state];
+  for(const [el,t,short] of [['lstatus','lstatusT',txt],['cstatus','cstatusT',state==='ok'?'Connected':state==='wait'?'Connecting':'Offline']]){
+    $(el).className='badge '+(state==='ok'?'ok':state==='bad'?'bad':'');
+    $(t).textContent=short;
+  }
+  $('beBadge').textContent=(backend==='render'?'🌐 Render':'💻 Local');
 }
-function addSys(t){
-  const d=document.createElement('div'); d.className='sys'; d.textContent=t;
-  $('log').appendChild(d); $('log').scrollTop=1e9;
+function connect(){
+  if(socket){socket.removeAllListeners();socket.disconnect();}
+  const url=urlFor(backend);
+  $('burl').textContent='🌐 '+url;
+  $('bRender').classList.toggle('on',backend==='render');
+  $('bLocal').classList.toggle('on',backend==='local');
+  setStatus('wait');
+  socket=io(url,{reconnection:true,reconnectionDelay:1000});
+  socket.on('connect',()=>{
+    setStatus('ok');
+    if(me) socket.emit('join',{name:me,rejoin:true},()=>{});
+  });
+  socket.on('connect_error',()=>setStatus('wait'));
+  socket.on('disconnect',()=>setStatus('bad'));
+  socket.on('users',list=>{users=list;renderSidebar();renderHeader();});
+  socket.on('system',s=>{if(!me)return;chats.main.msgs.push({sys:true,text:s.text,t:s.t});if(active==='main')renderMessages();});
+  socket.on('msg',m=>{
+    const k=m.to?ck(m.from):'main';
+    const c=chatOf(k,m.from);
+    c.msgs.push({mine:false,user:m.from,ct:m.ct,t:m.t});
+    if(k!==active) c.unread++;
+    renderSidebar(); if(k===active) renderMessages();
+  });
+  let tt;
+  socket.on('typing',d=>{
+    const k=d.to?ck(d.from):'main';
+    if(k!==active) return;
+    $('typing').textContent=d.from+' is typing…';
+    clearTimeout(tt);tt=setTimeout(()=>$('typing').textContent='',2000);
+  });
+}
+$('bRender').onclick=()=>{backend='render';connect();};
+$('bLocal').onclick=()=>{backend='local';connect();};
+
+/* ============ LOGIN ============ */
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{$('name').value=b.dataset.n;$('name').focus();});
+function join(){
+  const name=$('name').value.trim();
+  $('err').textContent='';
+  if(!name) return $('name').focus();
+  if(!socket||!socket.connected) return $('err').textContent='Not connected yet. Wait for the green Connected badge.';
+  socket.emit('join',{name},res=>{
+    if(!res||!res.ok) return $('err').textContent=(res&&res.error)||'Could not join';
+    me=res.name;
+    $('cipher').value=$('cipherL').value;
+    $('key').value=$('keyL').value;
+    $('login').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    $('meName').textContent=me;$('meAv').textContent=me[0].toUpperCase();
+    chats.main.msgs.unshift({banner:true,text:'🔒 Connected via Socket.IO over TCP to '+beName()+' · messages are encrypted before sending'});
+    setStatus('ok');renderSidebar();renderHeader();renderMessages();$('text').focus();
+  });
+}
+$('join').onclick=join;
+$('name').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
+$('logout').onclick=()=>location.reload();
+
+/* ============ RENDERING ============ */
+function avatar(name,online){
+  const d=document.createElement('div');d.className='av';
+  d.textContent=name[0].toUpperCase();
+  if(online){const o=document.createElement('span');o.className='on';d.appendChild(o);}
+  return d;
+}
+function renderSidebar(){
+  $('mainSub').textContent='Group chat — '+users.length+' online';
+  $('mainItem').classList.toggle('active',active==='main');
+  const mu=$('mainUnread');mu.textContent=chats.main.unread;mu.classList.toggle('hidden',!chats.main.unread);
+  const q=$('search').value.trim().toLowerCase();
+  const list=users.filter(u=>u.toLowerCase().includes(q));
+  $('ucount').textContent=users.length;
+  const box=$('ulist');box.innerHTML='';
+  list.forEach(u=>{
+    const self=u.toLowerCase()===me.toLowerCase();
+    const k=ck(u), c=chats[k];
+    const it=document.createElement('div');it.className='item'+(active===k?' active':'');
+    it.appendChild(avatar(u,true));
+    const g=document.createElement('div');g.className='grow';
+    const n=document.createElement('div');n.className='nm';n.textContent=u;
+    const s=document.createElement('div');s.className='st';s.textContent=self?"That's you":'Click to message';
+    g.append(n,s);it.appendChild(g);
+    if(self){const y=document.createElement('span');y.className='you';y.textContent='YOU';it.appendChild(y);}
+    else{
+      if(c&&c.unread){const b=document.createElement('span');b.className='unread';b.textContent=c.unread;it.appendChild(b);}
+      it.onclick=()=>openChat(k,u);
+    }
+    box.appendChild(it);
+  });
+}
+function openChat(k,name){
+  active=k;const c=chatOf(k,name);c.unread=0;c.name=name||c.name;
+  $('typing').textContent='';
+  document.body.classList.add('inchat');
+  renderSidebar();renderHeader();renderMessages();$('text').focus();
+}
+$('mainItem').onclick=()=>openChat('main','Main Room');
+$('back').onclick=()=>{document.body.classList.remove('inchat');};
+$('search').addEventListener('input',renderSidebar);
+
+function renderHeader(){
+  const h=$('hAv');
+  if(active==='main'){
+    h.textContent='💬';$('hName').textContent='Main Room';
+    $('hSub').textContent=users.length+' participant'+(users.length===1?'':'s')+' online';
+  }else{
+    const name=chats[active].name;
+    h.textContent=name[0].toUpperCase();$('hName').textContent=name;
+    const on=users.some(u=>u.toLowerCase()===name.toLowerCase());
+    $('hSub').textContent=on?'Direct message · online':'Direct message · offline';
+  }
+}
+function renderMessages(){
+  const log=$('log');log.innerHTML='';
+  const day=document.createElement('div');day.className='day';day.textContent='TODAY';log.appendChild(day);
+  const key=$('key').value,c=CIPHERS[$('cipher').value];
+  chats[active].msgs.forEach(m=>{
+    const d=document.createElement('div');
+    if(m.banner){d.className='banner';d.textContent=m.text;}
+    else if(m.sys){d.className='sys';d.textContent=m.text;const s=document.createElement('small');s.textContent=fmt(m.t);d.appendChild(s);}
+    else{
+      d.className='msg'+(m.mine?' me':'');
+      if(!m.mine){const w=document.createElement('div');w.className='who';w.textContent=m.user;d.appendChild(w);}
+      const b=document.createElement('div');b.textContent=m.mine?m.plain:c.dec(m.ct,key);d.appendChild(b);
+      const wr=document.createElement('div');wr.className='wire';wr.textContent='🔒 '+m.ct;d.appendChild(wr);
+      const tm=document.createElement('div');tm.className='time';tm.textContent=fmt(m.t);d.appendChild(tm);
+    }
+    log.appendChild(d);
+  });
+  log.scrollTop=log.scrollHeight;
 }
 
+/* ============ SENDING ============ */
 function send(){
-  const text=$('text').value; if(!text.trim()) return;
-  const cipher=$('cipher').value, key=$('key').value;
+  const text=$('text').value;if(!text.trim())return;
+  const cipher=$('cipher').value,key=$('key').value;
   const ct=CIPHERS[cipher].enc(text,key);
-  socket.emit('msg',{cipher,ct});
-  addMsg(me,text,ct,true);
-  $('text').value=''; $('preview').textContent='';
+  const to=active==='main'?null:chats[active].name;
+  socket.emit('msg',{to,cipher,ct});
+  chats[active].msgs.push({mine:true,plain:text,ct,t:Date.now()});
+  $('text').value='';$('preview').textContent='';
+  renderMessages();
 }
 $('send').onclick=send;
 $('text').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 let lastTyping=0;
+function updatePreview(){
+  const t=$('text').value;
+  $('preview').textContent=t?'Encrypts to: '+CIPHERS[$('cipher').value].enc(t,$('key').value):'';
+}
 $('text').addEventListener('input',()=>{
-  const c=$('cipher').value,k=$('key').value;
-  $('preview').textContent=$('text').value?'Encrypts to: '+CIPHERS[c].enc($('text').value,k):'';
-  if(Date.now()-lastTyping>1500){socket.emit('typing');lastTyping=Date.now();}
+  updatePreview();
+  if(Date.now()-lastTyping>1500){
+    socket.emit('typing',{to:active==='main'?null:chats[active].name});lastTyping=Date.now();
+  }
 });
-$('key').addEventListener('input',()=>$('text').dispatchEvent(new Event('input')));
-$('cipher').addEventListener('change',()=>$('text').dispatchEvent(new Event('input')));
-$('wire').onchange=e=>document.body.classList.toggle('showwire',e.target.checked);
+$('key').addEventListener('input',()=>{updatePreview();renderMessages();});
+$('cipher').addEventListener('change',()=>{updatePreview();renderMessages();});
 
-socket.on('msg',m=>{
-  // Decrypt with MY cipher/key settings. Wrong key = gibberish, which is the point.
-  const c=CIPHERS[$('cipher').value];
-  addMsg(m.user,c.dec(m.ct,$('key').value),m.ct,false,m.t);
-});
-socket.on('system',addSys);
-socket.on('users',list=>{
-  $('users').innerHTML='';
-  list.forEach(u=>{const d=document.createElement('div');d.className='user';d.textContent=u+(u===me?' (you)':'');$('users').appendChild(d);});
-});
-let tt;
-socket.on('typing',u=>{
-  $('typing').textContent=u+' is typing…';
-  clearTimeout(tt); tt=setTimeout(()=>$('typing').textContent='',2000);
-});
+/* ============ TOOLBAR ============ */
+$('wireBtn').onclick=()=>{
+  document.body.classList.toggle('showwire');
+  $('wireHint').textContent=document.body.classList.contains('showwire')
+    ?'· showing ciphertext (what the server sees)':'· click 🔒 to show ciphertext';
+};
+$('clearBtn').onclick=()=>{
+  chats[active].msgs=chats[active].msgs.filter(m=>m.banner);
+  renderMessages();
+};
+
+connect();
 </script>
 </body>
 </html>

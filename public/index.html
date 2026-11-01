@@ -227,7 +227,7 @@
     <div class="cbar">
       Cipher
       <select id="cipher"><option value="caesar">Caesar</option><option value="vigenere">Vigenère</option><option value="mono">Monoalphabetic</option></select>
-      Key <input id="key" placeholder="key">
+      Key <input id="key" placeholder="key"> <span id="keyWarn" style="color:var(--warn)"></span>
       <span id="wireHint">· 👁 shows what Eve (an eavesdropper) sees</span>
     </div>
     <div id="log"></div>
@@ -275,6 +275,14 @@ const CIPHERS={
   mono:{enc:(t,k)=>{const K=keyedAlphabet(k);return mapLetters(t,i=>K[i]);},
         dec:(t,k)=>{const K=keyedAlphabet(k);return mapLetters(t,i=>A[K.indexOf(A[i])]);}}
 };
+
+// Returns a message if the key doesn't suit the cipher (otherwise text would go out unencrypted)
+function keyProblem(cname,key){
+  if(cname==='caesar'&&!/^\s*-?\d+\s*$/.test(key)) return 'Caesar needs a number key, e.g. 5';
+  if(cname==='vigenere'&&!cleanKey(key)) return 'Vigenère needs a keyword with letters, e.g. SECRET';
+  if(cname==='mono'&&!cleanKey(key)) return 'Monoalphabetic needs a keyword with letters, e.g. SECRET';
+  return '';
+}
 
 /* ============ BACKENDS ============ */
 // Edit RENDER_URL if you rename your Render service.
@@ -352,6 +360,8 @@ function join(){
   const name=$('name').value.trim();
   $('err').textContent='';
   if(!name) return $('name').focus();
+  const kp=keyProblem($('cipherL').value,$('keyL').value);
+  if(kp) return $('err').textContent=kp;
   if(!socket||!socket.connected) return $('err').textContent='Not connected yet. Wait for the green Connected badge.';
   socket.emit('join',{name},res=>{
     if(!res||!res.ok) return $('err').textContent=(res&&res.error)||'Could not join';
@@ -363,7 +373,7 @@ function join(){
     $('meName').textContent=me;
     $('meAvBox').appendChild(avatar(me,true));
     chats.main.msgs.unshift({banner:true,text:'🔒 Connected to '+beName()+' via Socket.IO over TCP · messages are encrypted before sending'});
-    setStatus('ok');renderSidebar();renderHeader();renderMessages();$('text').focus();
+    setStatus('ok');renderSidebar();renderHeader();renderMessages();updatePreview();$('text').focus();
   });
 }
 $('join').onclick=join;
@@ -512,6 +522,8 @@ function updateLab(){
 function send(){
   const text=$('text').value;if(!text.trim())return;
   const cipher=$('cipher').value,key=$('key').value;
+  const kp=keyProblem(cipher,key);
+  if(kp){$('preview').textContent='⚠ Not sent. '+kp;return;}
   const ct=CIPHERS[cipher].enc(text,key);
   const to=active==='main'?null:chats[active].name;
   socket.emit('msg',{to,cipher,ct});
@@ -524,7 +536,9 @@ $('text').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 let lastTyping=0;
 function updatePreview(){
   const t=$('text').value;
-  $('preview').textContent=t?'🔒 '+CIPHERS[$('cipher').value].enc(t,$('key').value):'';
+  const kp=keyProblem($('cipher').value,$('key').value);
+  $('keyWarn').textContent=kp?'⚠ '+kp:'';
+  $('preview').textContent=kp?'':(t?'🔒 '+CIPHERS[$('cipher').value].enc(t,$('key').value):'');
   updateLab();
 }
 $('text').addEventListener('input',()=>{

@@ -3,96 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CipherChat</title>
+<title>CipherChat · Encrypted Messaging Lab</title>
 <style>
-  :root{--bg:#0a0f13;--panel:#111a20;--panel2:#16222a;--line:#1f2d37;--txt:#e6edf3;--mut:#8b9aa7;--acc:#10b981;--accd:#0d9668;--me:#0f6b55;--warn:#f5b942;--bad:#ef4444}
+  :root{--bg:#0a0d1a;--p1:#10142a;--p2:#161b36;--line:#232a4a;--txt:#e8ebff;--mut:#8a93bd;
+        --a1:#7c5cff;--a2:#22d3ee;--warn:#fbbf24;--bad:#f87171;--ok:#34d399}
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center}
-  input,select,button{font:inherit;color:var(--txt);background:#0d141a;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-  input:focus,select:focus{outline:none;border-color:var(--acc)}
+  body{margin:0;background:radial-gradient(1200px 600px at 10% -10%,#1d1650 0,transparent 60%),radial-gradient(900px 500px at 100% 110%,#08323d 0,transparent 55%),var(--bg);
+       color:var(--txt);font-family:system-ui,Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center}
+  input,select,button{font:inherit;color:var(--txt);background:#0c1024;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  input:focus,select:focus{outline:none;border-color:var(--a1);box-shadow:0 0 0 3px #7c5cff30}
   button{cursor:pointer}
-  button.primary{background:var(--accd);border:none;font-weight:600;color:#fff}
-  button.primary:hover{background:var(--acc)}
+  .grad{background:linear-gradient(135deg,var(--a1),#4f8cff 60%,var(--a2));border:none;color:#fff;font-weight:600}
+  .grad:hover{filter:brightness(1.1)}
   .hidden{display:none!important}
+  .mono{font-family:ui-monospace,Consolas,monospace}
 
-  /* login */
-  #login{width:min(430px,94vw);max-height:98vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px}
-  .logo{width:60px;height:60px;border-radius:16px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;box-shadow:0 0 24px #10b98155}
-  #login h1{text-align:center;margin:0;font-size:24px}
-  #login .sub{text-align:center;color:var(--mut);margin:4px 0 12px;font-size:14px}
-  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#0d141a}
+  /* ---------- LOGIN ---------- */
+  #login{width:min(900px,95vw);max-height:98vh;overflow:auto;display:grid;grid-template-columns:1.05fr 1fr;background:var(--p1);border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 80px #0008}
+  .hero{padding:34px;background:linear-gradient(160deg,#2a1d7a,#13306b 55%,#0b4a5a);display:flex;flex-direction:column;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
+  .brand .lg{width:40px;height:40px;border-radius:12px;background:#ffffff22;display:flex;align-items:center;justify-content:center}
+  .hero h2{margin:8px 0 0;font-size:28px;line-height:1.2}
+  .hero p{margin:0;color:#c9d2ff;font-size:14px;line-height:1.5}
+  .demo{margin-top:auto;background:#0006;border:1px solid #ffffff22;border-radius:14px;padding:14px;font-size:13px}
+  .demo .r{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+  .demo b{color:var(--a2)}
+  .demo .arrow{text-align:center;color:#c9d2ff;opacity:.8;font-size:12px;padding:2px 0}
+  .form{padding:30px}
+  .form h3{margin:0 0 4px;font-size:20px}
+  .form .sub{color:var(--mut);font-size:13px;margin:0 0 14px}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#0c1024}
   .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--warn)}
-  .badge.ok{color:var(--acc)} .badge.ok .dot{background:var(--acc)}
+  .badge.ok{color:var(--ok)} .badge.ok .dot{background:var(--ok)}
   .badge.bad{color:var(--bad)} .badge.bad .dot{background:var(--bad)}
-  .center{text-align:center}
-  .box{border:1px solid var(--line);background:#0d141a;border-radius:12px;padding:12px;margin:14px 0}
-  .box .t{font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+  .box{border:1px solid var(--line);background:#0c1024;border-radius:12px;padding:10px;margin:12px 0}
+  .box .t{font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px 2px}
   .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .seg button{background:transparent;border:1px solid transparent}
-  .seg button.on{background:var(--accd);color:#fff;font-weight:600}
-  .url{font-size:11px;color:var(--mut);margin-top:8px;word-break:break-all}
-  label.l{display:block;font-size:12px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.05em}
+  .seg button{background:transparent;border:1px solid transparent;padding:8px}
+  .seg button.on{background:linear-gradient(135deg,var(--a1),#4f8cff);color:#fff;font-weight:600}
+  .url{font-size:11px;color:var(--mut);margin:8px 0 0 2px;word-break:break-all}
+  label.l{display:block;font-size:11px;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.06em}
   .full{width:100%}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center;font-size:12px;color:var(--mut)}
-  .chip{padding:5px 10px;border-radius:8px;font-size:12px;color:var(--acc)}
-  #err{color:var(--bad);font-size:13px;min-height:18px;margin-top:8px}
-  .foot{text-align:center;color:var(--mut);font-size:12px;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .chip{padding:4px 10px;border-radius:8px;font-size:12px;color:var(--a2)}
+  #err{color:var(--bad);font-size:13px;min-height:18px;margin:8px 0 2px}
+  .foot{color:var(--mut);font-size:11px;margin-top:12px;text-align:center}
 
-  /* app */
-  #app{width:min(1150px,98vw);height:95vh;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;grid-template-columns:320px 1fr}
-  aside{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
-  .me{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--panel2)}
-  .av{position:relative;width:42px;height:42px;border-radius:50%;background:var(--accd);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
-  .av.sm{width:38px;height:38px}
-  .av .on{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:var(--acc);border:2px solid var(--panel)}
+  /* ---------- APP ---------- */
+  #app{width:min(1440px,99vw);height:96vh;display:grid;grid-template-columns:270px 1fr 330px;background:var(--p1);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0008}
+  .av{position:relative;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;color:#fff}
+  .av.sm{width:36px;height:36px;border-radius:10px}
+  .av .on{position:absolute;right:-3px;bottom:-3px;width:11px;height:11px;border-radius:50%;background:var(--ok);border:2px solid var(--p1)}
   .grow{flex:1;min-width:0}
   .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .st{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .st.g{color:var(--acc)}
-  .ib{background:transparent;border:none;padding:8px;font-size:18px;color:var(--mut)}
-  .ib:hover{color:var(--txt)}
-  .item{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;border-left:3px solid transparent}
-  .item:hover{background:#16222a}
-  .item.active{background:#1b2a33;border-left-color:var(--acc)}
-  .unread{background:var(--acc);color:#04130d;font-size:11px;font-weight:700;border-radius:99px;min-width:20px;text-align:center;padding:2px 6px}
-  .you{font-size:10px;color:var(--acc);background:#10b9811f;padding:2px 6px;border-radius:5px}
-  .search{padding:10px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .search input{width:100%;border-radius:99px}
-  .sect{font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;display:flex;justify-content:space-between}
-  #ulist{overflow:auto;flex:1}
+  .ib{background:transparent;border:none;padding:7px 9px;font-size:17px;color:var(--mut);border-radius:8px}
+  .ib:hover{color:var(--txt);background:#ffffff10}
+  .ib.on{color:var(--a2);background:#22d3ee18}
 
-  main{display:flex;flex-direction:column;min-width:0;min-height:0}
-  .head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .left{display:flex;flex-direction:column;min-height:0;background:var(--p1);border-right:1px solid var(--line)}
+  .logo{display:flex;align-items:center;gap:10px;padding:16px;font-weight:700;font-size:17px}
+  .logo i{font-style:normal;width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--a1),var(--a2));display:flex;align-items:center;justify-content:center;font-size:16px}
+  .sect{font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:12px 16px 6px;display:flex;justify-content:space-between}
+  .item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:2px 8px;border-radius:12px;cursor:pointer}
+  .item:hover{background:#ffffff0a}
+  .item.active{background:linear-gradient(90deg,#7c5cff30,#22d3ee12);outline:1px solid #7c5cff55}
+  .unread{background:var(--a1);color:#fff;font-size:11px;font-weight:700;border-radius:99px;min-width:20px;text-align:center;padding:2px 6px}
+  .you{font-size:10px;color:var(--a2);background:#22d3ee18;padding:2px 6px;border-radius:5px}
+  .search{padding:4px 12px 8px}.search input{width:100%;border-radius:10px;padding:8px 12px;font-size:13px}
+  #ulist{overflow:auto;flex:1;padding-bottom:8px}
+  .profile{display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--line);background:var(--p2)}
+
+  .chat{display:flex;flex-direction:column;min-width:0;min-height:0}
+  .head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--p1)}
   .head .back{display:none}
-  .hr{display:flex;gap:8px;align-items:center}
-  .hr .badge{padding:4px 10px}
-  .cbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut)}
-  .cbar select,.cbar input{padding:6px 10px;font-size:13px}
-  .cbar input{width:120px}
-  #log{flex:1;overflow:auto;padding:14px 18px;display:flex;flex-direction:column;gap:6px;background-image:radial-gradient(#1b2830 1px,transparent 1px);background-size:20px 20px}
-  .day{align-self:center;font-size:11px;color:var(--mut);background:#16222a;padding:3px 12px;border-radius:6px;margin:4px 0}
-  .sys{align-self:center;font-size:12px;color:var(--mut);background:#16222a;border:1px solid var(--line);padding:4px 12px;border-radius:99px}
+  .hr{display:flex;gap:6px;align-items:center}
+  .cbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--mut);background:#0d112300}
+  .cbar select,.cbar input{padding:6px 10px;font-size:13px}.cbar input{width:120px}
+  #log{flex:1;overflow:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px}
+  .day{align-self:center;font-size:11px;color:var(--mut);letter-spacing:.1em;margin:2px 0}
+  .sys{align-self:center;font-size:12px;color:var(--mut);padding:3px 12px;border-radius:99px;border:1px dashed var(--line)}
   .sys small{margin-left:6px;opacity:.7}
-  .banner{align-self:center;font-size:12px;color:var(--warn);background:#16222a;border:1px solid var(--line);padding:5px 14px;border-radius:8px}
-  .msg{max-width:72%;padding:8px 12px;border-radius:12px;background:#1b2832;word-wrap:break-word}
-  .msg.me{align-self:flex-end;background:var(--me)}
-  .msg .who{font-size:12px;color:var(--acc);margin-bottom:2px;font-weight:600}
-  .msg .wire{display:none;margin-top:6px;padding-top:6px;border-top:1px dashed #ffffff30;font:12px ui-monospace,monospace;color:var(--warn);word-break:break-all}
-  body.showwire .msg .wire{display:block}
-  .msg .time{font-size:10px;color:#b4c0ca99;text-align:right;margin-top:2px}
-  #typing{min-height:18px;padding:0 18px;font-size:12px;color:var(--mut)}
-  #preview{padding:0 18px 6px;font:12px ui-monospace,monospace;color:var(--warn);min-height:18px;word-break:break-all}
-  .send{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:var(--panel2)}
-  .send input{flex:1;border-radius:99px;padding:11px 16px}
-  .send button{border-radius:99px;padding:0 22px}
+  .banner{align-self:center;font-size:12px;color:var(--a2);background:#22d3ee12;border:1px solid #22d3ee33;padding:6px 14px;border-radius:10px;text-align:center}
+  .msg{max-width:70%;padding:9px 13px;border-radius:4px 16px 16px 16px;background:var(--p2);border:1px solid var(--line);border-left:3px solid var(--a2);word-wrap:break-word}
+  .msg.me{align-self:flex-end;background:linear-gradient(135deg,#6a4cf0,#4f8cff);border:none;border-radius:16px 4px 16px 16px}
+  .msg .who{font-size:12px;color:var(--a2);margin-bottom:2px;font-weight:600}
+  .msg .wire{display:none;margin-top:6px;padding:5px 8px;border-radius:8px;background:#0006;font:12px ui-monospace,Consolas,monospace;color:var(--warn);word-break:break-all}
+  body.eve .msg .wire{display:block}
+  .msg .time{font-size:10px;color:#ffffff88;text-align:right;margin-top:3px}
+  #typing{min-height:18px;padding:0 20px;font-size:12px;color:var(--mut)}
+  #preview{padding:0 20px 6px;font:12px ui-monospace,Consolas,monospace;color:var(--warn);min-height:18px;word-break:break-all}
+  .send{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:var(--p1)}
+  .send input{flex:1;border-radius:12px;padding:12px 16px}
+  .send button{border-radius:12px;padding:0 24px}
 
+  /* ---------- CRYPTO LAB ---------- */
+  .lab{display:flex;flex-direction:column;min-height:0;overflow:auto;border-left:1px solid var(--line);background:var(--p1)}
+  .lab h4{margin:0;padding:16px 16px 4px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+  .lab .cap{padding:0 16px 8px;font-size:12px;color:var(--mut)}
+  .card{margin:8px 12px;padding:12px;border:1px solid var(--line);background:var(--p2);border-radius:12px}
+  .card .ct{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+  .kv{font-size:13px;margin:3px 0;word-break:break-all}
+  .kv span{display:inline-block;width:78px;color:var(--mut);font-size:11px;text-transform:uppercase}
+  .kv.c{color:var(--warn)}
+  .map{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;font:11px ui-monospace,Consolas,monospace;text-align:center}
+  .map div{background:#0c1024;border-radius:5px;padding:2px 0;line-height:1.3}
+  .map div b{display:block;color:var(--txt);font-weight:500}
+  .map div i{display:block;color:var(--a2);font-style:normal}
+  .vt{width:100%;border-collapse:collapse;font:12px ui-monospace,Consolas,monospace;text-align:center}
+  .vt td{padding:3px 2px;background:#0c1024;border:1px solid var(--p2)}
+  .vt td:first-child{color:var(--mut);text-align:left;font-family:system-ui;font-size:10px;text-transform:uppercase;width:44px}
+  .freq{display:flex;align-items:flex-end;gap:2px;height:80px}
+  .freq div{flex:1;background:linear-gradient(var(--a2),var(--a1));border-radius:3px 3px 0 0;min-height:1px}
+  .flab{display:flex;gap:2px;font:9px ui-monospace,monospace;color:var(--mut);margin-top:3px}.flab span{flex:1;text-align:center}
+  .crack{max-height:170px;overflow:auto;font:12px ui-monospace,Consolas,monospace}
+  .crack div{padding:3px 6px;border-radius:6px;word-break:break-all}
+  .crack div.hit{background:#34d39922;color:var(--ok)}
+  .note{font-size:12px;color:var(--mut);line-height:1.5}
+
+  @media(max-width:1100px){
+    #app{grid-template-columns:270px 1fr}
+    .lab{position:fixed;right:0;top:0;bottom:0;width:min(350px,92vw);transform:translateX(105%);transition:transform .25s;z-index:20;box-shadow:-20px 0 60px #000a}
+    body.labopen .lab{transform:none}
+  }
+  @media(min-width:1101px){#labBtn{display:none}}
   @media(max-width:760px){
+    #login{grid-template-columns:1fr}.hero{display:none}
     #app{grid-template-columns:1fr;height:100vh;width:100vw;border-radius:0}
-    main{display:none}
-    body.inchat aside{display:none}
-    body.inchat main{display:flex}
+    .chat{display:none}
+    body.inchat .left{display:none}
+    body.inchat .chat{display:flex}
     .head .back{display:block}
     .hr .badge.be{display:none}
   }
@@ -100,72 +142,85 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ===== LOGIN ===== -->
 <div id="login">
-  <div class="logo">🔐</div>
-  <h1>CipherChat</h1>
-  <p class="sub">Real-time college chat with substitution-cipher encryption</p>
-  <div class="center"><span class="badge" id="lstatus"><span class="dot"></span><span id="lstatusT">Connecting…</span></span></div>
-
-  <div class="box">
-    <div class="t">Backend server</div>
-    <div class="seg">
-      <button id="bRender" class="on">🌐 Render Cloud</button>
-      <button id="bLocal">💻 Local</button>
+  <div class="hero">
+    <div class="brand"><span class="lg">🔐</span> CipherChat</div>
+    <h2>Messages the network can’t read.</h2>
+    <p>Every message is scrambled with a classical substitution cipher in your browser before it travels. The server only ever relays ciphertext.</p>
+    <div class="demo mono">
+      <div class="r"><span>plaintext</span><b>HELLO WORLD</b></div>
+      <div class="arrow">↓ Caesar cipher, key = 5</div>
+      <div class="r"><span>on the wire</span><b>MJQQT BTWQI</b></div>
     </div>
-    <div class="url" id="burl"></div>
   </div>
+  <div class="form">
+    <h3>Join the lab</h3>
+    <p class="sub">Pick a name, a cipher and a shared key.</p>
+    <span class="badge" id="lstatus"><span class="dot"></span><span id="lstatusT">Connecting…</span></span>
 
-  <label class="l">Choose your username</label>
-  <input class="full" id="name" placeholder="e.g. Sarthak or Rohit" maxlength="20" autocomplete="off">
-  <div class="chips">Quick fill for testing:
-    <button class="chip" data-n="Shlok">+ Shlok</button>
-    <button class="chip" data-n="Rahul">+ Rahul</button>
-    <button class="chip" data-n="Priya">+ Priya</button>
-    <button class="chip" data-n="Aman">+ Aman</button>
-  </div>
+    <div class="box">
+      <div class="t">Server</div>
+      <div class="seg">
+        <button id="bRender" class="on">🌐 Render Cloud</button>
+        <button id="bLocal">💻 Local</button>
+      </div>
+      <div class="url" id="burl"></div>
+    </div>
 
-  <div class="row2">
-    <div><label class="l">Cipher</label>
-      <select class="full" id="cipherL">
-        <option value="caesar">Caesar (number)</option>
-        <option value="vigenere">Vigenère (word)</option>
-        <option value="mono">Monoalphabetic (word)</option>
-      </select></div>
-    <div><label class="l">Shared secret key</label><input class="full" id="keyL" placeholder="5 or SECRET" value="5"></div>
+    <label class="l">Username</label>
+    <input class="full" id="name" placeholder="e.g. Alice" maxlength="20" autocomplete="off">
+    <div class="chips">Try as:
+      <button class="chip" data-n="Alice">Alice</button>
+      <button class="chip" data-n="Bob">Bob</button>
+      <button class="chip" data-n="Eve">Eve</button>
+    </div>
+
+    <div class="row2">
+      <div><label class="l">Cipher</label>
+        <select class="full" id="cipherL">
+          <option value="caesar">Caesar (number)</option>
+          <option value="vigenere">Vigenère (word)</option>
+          <option value="mono">Monoalphabetic (word)</option>
+        </select></div>
+      <div><label class="l">Shared key</label><input class="full" id="keyL" placeholder="5 or SECRET" value="5"></div>
+    </div>
+    <div id="err"></div>
+    <button class="grad full" id="join" style="padding:13px">Enter chat →</button>
+    <div class="foot">Socket.IO over TCP · client-side substitution encryption</div>
   </div>
-  <div id="err"></div>
-  <button class="primary full" id="join" style="padding:13px">Join Chat Room</button>
-  <div class="foot">⚡ Socket.IO over TCP • Substitution cipher encrypts before sending</div>
 </div>
 
-<!-- APP -->
+<!-- ===== APP ===== -->
 <div id="app" class="hidden">
-  <aside>
-    <div class="me">
-      <div class="av"><span id="meAv">?</span><span class="on"></span></div>
-      <div class="grow"><div class="nm"><span id="meName"></span> <span style="color:var(--acc);font-weight:400;font-size:13px">(You)</span></div><div class="st g">● Active now</div></div>
-      <button class="ib" id="logout" title="Logout">⎋</button>
-    </div>
+  <aside class="left">
+    <div class="logo"><i>🔐</i> CipherChat</div>
+    <div class="sect"><span>Channels</span></div>
     <div class="item active" id="mainItem">
-      <div class="av sm" style="font-size:18px">💬</div>
-      <div class="grow"><div class="nm">Main Room</div><div class="st" id="mainSub">Group chat</div></div>
+      <div class="av sm" style="background:linear-gradient(135deg,var(--a1),var(--a2));font-size:17px">#</div>
+      <div class="grow"><div class="nm">lobby</div><div class="st" id="mainSub">Group channel</div></div>
       <span class="unread hidden" id="mainUnread">0</span>
     </div>
-    <div class="search"><input id="search" placeholder="🔍 Search users for DM…" autocomplete="off"></div>
-    <div class="sect"><span>Online — click to DM</span><span id="ucount">0</span></div>
+    <div class="sect"><span>Direct messages</span><span id="ucount">0</span></div>
+    <div class="search"><input id="search" placeholder="Find a user…" autocomplete="off"></div>
     <div id="ulist"></div>
+    <div class="profile">
+      <span id="meAvBox"></span>
+      <div class="grow"><div class="nm"><span id="meName"></span></div><div class="st" style="color:var(--ok)">● Online</div></div>
+      <button class="ib" id="logout" title="Logout">⎋</button>
+    </div>
   </aside>
 
-  <main>
+  <main class="chat">
     <div class="head">
       <button class="ib back" id="back">←</button>
-      <div class="av sm" id="hAv" style="font-size:18px">💬</div>
-      <div class="grow"><div class="nm" id="hName">Main Room</div><div class="st" id="hSub"></div></div>
+      <div class="av sm" id="hAv">#</div>
+      <div class="grow"><div class="nm" id="hName">lobby</div><div class="st" id="hSub"></div></div>
       <div class="hr">
         <span class="badge be" id="beBadge">🌐 Render</span>
         <span class="badge" id="cstatus"><span class="dot"></span><span id="cstatusT">Connecting</span></span>
-        <button class="ib" id="wireBtn" title="Show ciphertext (what the server sees)">🔒</button>
+        <button class="ib" id="wireBtn" title="Eve's view: show what an eavesdropper sees">👁</button>
+        <button class="ib" id="labBtn" title="Crypto Lab">🧪</button>
         <button class="ib" id="clearBtn" title="Clear this chat">🗑</button>
       </div>
     </div>
@@ -173,13 +228,23 @@
       Cipher
       <select id="cipher"><option value="caesar">Caesar</option><option value="vigenere">Vigenère</option><option value="mono">Monoalphabetic</option></select>
       Key <input id="key" placeholder="key">
-      <span id="wireHint">· click 🔒 to show ciphertext</span>
+      <span id="wireHint">· 👁 shows what Eve (an eavesdropper) sees</span>
     </div>
     <div id="log"></div>
     <div id="typing"></div>
     <div id="preview"></div>
-    <div class="send"><input id="text" placeholder="Type a message…" autocomplete="off"><button class="primary" id="send">Send</button></div>
+    <div class="send"><input id="text" placeholder="Type a message…" autocomplete="off"><button class="grad" id="send">Send</button></div>
   </main>
+
+  <aside class="lab" id="lab">
+    <h4>🧪 Crypto Lab <button class="ib" id="labClose" style="font-size:15px">✕</button></h4>
+    <div class="cap">Watch the cipher work on this conversation, live.</div>
+
+    <div class="card"><div class="ct">1 · Encryption in action</div><div id="labLive"></div></div>
+    <div class="card"><div class="ct" id="mapTitle">2 · Substitution table</div><div id="labMap"></div></div>
+    <div class="card"><div class="ct">3 · Letter frequency (what an attacker sees)</div><div id="labFreq"></div></div>
+    <div class="card"><div class="ct">4 · Attack: brute-force the last message</div><div id="labCrack"></div></div>
+  </aside>
 </div>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -187,7 +252,7 @@
 /* ============ SUBSTITUTION CIPHERS ============ */
 const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const mod=(n,m)=>((n%m)+m)%m;
-function mapLetters(text,fn){           // letters only; keeps case, digits, punctuation
+function mapLetters(text,fn){
   return [...text].map(c=>{
     const u=c.toUpperCase(), i=A.indexOf(u);
     if(i<0) return c;
@@ -195,13 +260,14 @@ function mapLetters(text,fn){           // letters only; keeps case, digits, pun
     return c===u?r:r.toLowerCase();
   }).join('');
 }
+const cleanKey=k=>k.toUpperCase().replace(/[^A-Z]/g,'');
 function vig(t,k,sign){
-  k=k.toUpperCase().replace(/[^A-Z]/g,'');
+  k=cleanKey(k);
   if(!k) return t;
   let j=0;
   return mapLetters(t,i=>A[mod(i+sign*(k.charCodeAt(j++%k.length)-65),26)]);
 }
-const keyedAlphabet=w=>[...new Set([...(w.toUpperCase().replace(/[^A-Z]/g,'')+A)])].join('');
+const keyedAlphabet=w=>[...new Set([...(cleanKey(w)+A)])].join('');
 const CIPHERS={
   caesar:{enc:(t,k)=>{const s=parseInt(k)||0;return mapLetters(t,i=>A[mod(i+s,26)]);},
           dec:(t,k)=>{const s=parseInt(k)||0;return mapLetters(t,i=>A[mod(i-s,26)]);}},
@@ -211,7 +277,7 @@ const CIPHERS={
 };
 
 /* ============ BACKENDS ============ */
-// Edit these two if your URLs differ.
+// Edit RENDER_URL if you rename your Render service.
 const RENDER_URL='https://cipherchat-sarthak.onrender.com';
 const LOCAL_URL='http://localhost:3000';
 const isLocalHost=/^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
@@ -223,34 +289,41 @@ let backend=isLocalHost?'local':'render';
 /* ============ STATE ============ */
 const $=id=>document.getElementById(id);
 let socket=null, me='', users=[];
-const chats={main:{name:'Main Room',msgs:[],unread:0}};
+const chats={main:{name:'lobby',msgs:[],unread:0}};
 let active='main';
 const ck=n=>n?'dm:'+n.toLowerCase():'main';
 const chatOf=(k,name)=>chats[k]||(chats[k]={name:name||'',msgs:[],unread:0});
 const fmt=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 const beName=()=>backend==='render'?'Render Cloud':'Local';
+function paint(el,name){
+  let h=0;for(const c of name)h=(h*31+c.charCodeAt(0))%360;
+  el.style.background=`linear-gradient(135deg,hsl(${h},70%,55%),hsl(${(h+45)%360},70%,42%))`;
+  el.textContent=name[0].toUpperCase();
+}
+function avatar(name,online,small){
+  const d=document.createElement('div');d.className='av'+(small?' sm':'');paint(d,name);
+  if(online){const o=document.createElement('span');o.className='on';d.appendChild(o);}
+  return d;
+}
 
 /* ============ CONNECTION ============ */
 function setStatus(state){
-  const txt={ok:'Connected ('+beName()+')',wait:'Connecting… server may be waking up',bad:'Disconnected'}[state];
-  for(const [el,t,short] of [['lstatus','lstatusT',txt],['cstatus','cstatusT',state==='ok'?'Connected':state==='wait'?'Connecting':'Offline']]){
-    $(el).className='badge '+(state==='ok'?'ok':state==='bad'?'bad':'');
-    $(t).textContent=short;
-  }
+  const full={ok:'Connected ('+beName()+')',wait:'Connecting… server may be waking up',bad:'Disconnected'}[state];
+  const short=state==='ok'?'Connected':state==='wait'?'Connecting':'Offline';
+  const cls='badge '+(state==='ok'?'ok':state==='bad'?'bad':'');
+  $('lstatus').className=cls;$('lstatusT').textContent=full;
+  $('cstatus').className=cls;$('cstatusT').textContent=short;
   $('beBadge').textContent=(backend==='render'?'🌐 Render':'💻 Local');
 }
 function connect(){
   if(socket){socket.removeAllListeners();socket.disconnect();}
   const url=urlFor(backend);
-  $('burl').textContent='🌐 '+url;
+  $('burl').textContent=url;
   $('bRender').classList.toggle('on',backend==='render');
   $('bLocal').classList.toggle('on',backend==='local');
   setStatus('wait');
   socket=io(url,{reconnection:true,reconnectionDelay:1000});
-  socket.on('connect',()=>{
-    setStatus('ok');
-    if(me) socket.emit('join',{name:me,rejoin:true},()=>{});
-  });
+  socket.on('connect',()=>{setStatus('ok');if(me)socket.emit('join',{name:me,rejoin:true},()=>{});});
   socket.on('connect_error',()=>setStatus('wait'));
   socket.on('disconnect',()=>setStatus('bad'));
   socket.on('users',list=>{users=list;renderSidebar();renderHeader();});
@@ -287,8 +360,9 @@ function join(){
     $('key').value=$('keyL').value;
     $('login').classList.add('hidden');
     $('app').classList.remove('hidden');
-    $('meName').textContent=me;$('meAv').textContent=me[0].toUpperCase();
-    chats.main.msgs.unshift({banner:true,text:'🔒 Connected via Socket.IO over TCP to '+beName()+' · messages are encrypted before sending'});
+    $('meName').textContent=me;
+    $('meAvBox').appendChild(avatar(me,true));
+    chats.main.msgs.unshift({banner:true,text:'🔒 Connected to '+beName()+' via Socket.IO over TCP · messages are encrypted before sending'});
     setStatus('ok');renderSidebar();renderHeader();renderMessages();$('text').focus();
   });
 }
@@ -297,28 +371,21 @@ $('name').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
 $('logout').onclick=()=>location.reload();
 
 /* ============ RENDERING ============ */
-function avatar(name,online){
-  const d=document.createElement('div');d.className='av';
-  d.textContent=name[0].toUpperCase();
-  if(online){const o=document.createElement('span');o.className='on';d.appendChild(o);}
-  return d;
-}
 function renderSidebar(){
-  $('mainSub').textContent='Group chat — '+users.length+' online';
+  $('mainSub').textContent='Group channel · '+users.length+' online';
   $('mainItem').classList.toggle('active',active==='main');
   const mu=$('mainUnread');mu.textContent=chats.main.unread;mu.classList.toggle('hidden',!chats.main.unread);
   const q=$('search').value.trim().toLowerCase();
-  const list=users.filter(u=>u.toLowerCase().includes(q));
-  $('ucount').textContent=users.length;
+  $('ucount').textContent=users.length+' online';
   const box=$('ulist');box.innerHTML='';
-  list.forEach(u=>{
+  users.filter(u=>u.toLowerCase().includes(q)).forEach(u=>{
     const self=u.toLowerCase()===me.toLowerCase();
-    const k=ck(u), c=chats[k];
+    const k=ck(u),c=chats[k];
     const it=document.createElement('div');it.className='item'+(active===k?' active':'');
-    it.appendChild(avatar(u,true));
+    it.appendChild(avatar(u,true,true));
     const g=document.createElement('div');g.className='grow';
     const n=document.createElement('div');n.className='nm';n.textContent=u;
-    const s=document.createElement('div');s.className='st';s.textContent=self?"That's you":'Click to message';
+    const s=document.createElement('div');s.className='st';s.textContent=self?'You':'Tap to message';
     g.append(n,s);it.appendChild(g);
     if(self){const y=document.createElement('span');y.className='you';y.textContent='YOU';it.appendChild(y);}
     else{
@@ -334,20 +401,20 @@ function openChat(k,name){
   document.body.classList.add('inchat');
   renderSidebar();renderHeader();renderMessages();$('text').focus();
 }
-$('mainItem').onclick=()=>openChat('main','Main Room');
-$('back').onclick=()=>{document.body.classList.remove('inchat');};
+$('mainItem').onclick=()=>openChat('main','lobby');
+$('back').onclick=()=>document.body.classList.remove('inchat');
 $('search').addEventListener('input',renderSidebar);
 
 function renderHeader(){
   const h=$('hAv');
   if(active==='main'){
-    h.textContent='💬';$('hName').textContent='Main Room';
+    h.style.background='linear-gradient(135deg,var(--a1),var(--a2))';h.textContent='#';
+    $('hName').textContent='lobby';
     $('hSub').textContent=users.length+' participant'+(users.length===1?'':'s')+' online';
   }else{
-    const name=chats[active].name;
-    h.textContent=name[0].toUpperCase();$('hName').textContent=name;
+    const name=chats[active].name;paint(h,name);$('hName').textContent=name;
     const on=users.some(u=>u.toLowerCase()===name.toLowerCase());
-    $('hSub').textContent=on?'Direct message · online':'Direct message · offline';
+    $('hSub').textContent='Direct message · '+(on?'online':'offline');
   }
 }
 function renderMessages(){
@@ -368,6 +435,77 @@ function renderMessages(){
     log.appendChild(d);
   });
   log.scrollTop=log.scrollHeight;
+  updateLab();
+}
+
+/* ============ CRYPTO LAB ============ */
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
+function kv(label,val,cls){const d=el('div','kv '+(cls||''));d.appendChild(el('span','',label));d.appendChild(document.createTextNode(val));return d;}
+function updateLab(){
+  if(!me) return;
+  const cname=$('cipher').value,key=$('key').value,C=CIPHERS[cname];
+  const real=chats[active].msgs.filter(m=>!m.sys&&!m.banner);
+  const last=real[real.length-1];
+  const typed=$('text').value;
+  const lastPlain=last?(last.mine?last.plain:C.dec(last.ct,key)):'';
+
+  // 1. live
+  const live=$('labLive');live.innerHTML='';
+  live.appendChild(kv('Cipher',{caesar:'Caesar',vigenere:'Vigenère',mono:'Monoalphabetic'}[cname]));
+  live.appendChild(kv('Key',key||'(empty)'));
+  const srcPlain=typed||lastPlain, srcCt=typed?C.enc(typed,key):(last?last.ct:'');
+  live.appendChild(kv('Source',typed?'what you are typing':(last?'last message':'-')));
+  live.appendChild(kv('Plaintext',srcPlain||'-'));
+  live.appendChild(kv('Ciphertext',srcCt||'-','c'));
+
+  // 2. table
+  const mp=$('labMap');mp.innerHTML='';
+  if(cname==='vigenere'){
+    $('mapTitle').textContent='2 · Key stream (Vigenère)';
+    const k=cleanKey(key),letters=[...srcPlain].filter(c=>/[a-z]/i.test(c)).slice(0,10);
+    if(!k||!letters.length){mp.appendChild(el('div','note','Type a message and set a keyword to see how each letter gets its own shift.'));}
+    else{
+      const t=el('table','vt');
+      const rows=[['plain',letters.map(c=>c.toUpperCase())],
+                  ['key',letters.map((c,i)=>k[i%k.length])],
+                  ['shift',letters.map((c,i)=>k.charCodeAt(i%k.length)-65)],
+                  ['cipher',letters.map((c,i)=>A[mod(A.indexOf(c.toUpperCase())+k.charCodeAt(i%k.length)-65,26)])]];
+      rows.forEach(([n,arr])=>{const tr=document.createElement('tr');tr.appendChild(el('td','',n));arr.forEach(v=>tr.appendChild(el('td','',String(v))));t.appendChild(tr);});
+      mp.appendChild(t);
+      mp.appendChild(el('div','note','The shift changes with every letter, so one plaintext letter can map to many ciphertext letters.'));
+    }
+  }else{
+    $('mapTitle').textContent='2 · Substitution table';
+    const K=cname==='caesar'?[...A].map((_,i)=>A[mod(i+(parseInt(key)||0),26)]).join(''):keyedAlphabet(key);
+    const g=el('div','map');
+    [...A].forEach((ch,i)=>{const d=el('div');d.appendChild(el('b','',ch));d.appendChild(el('i','',K[i]));g.appendChild(d);});
+    mp.appendChild(g);
+    mp.appendChild(el('div','note','Top: plaintext letter. Bottom (cyan): what it becomes.'));
+  }
+
+  // 3. frequency
+  const fq=$('labFreq');fq.innerHTML='';
+  const cnt=Array(26).fill(0);
+  real.forEach(m=>{for(const ch of m.ct.toUpperCase()){const i=A.indexOf(ch);if(i>=0)cnt[i]++;}});
+  const mx=Math.max(...cnt);
+  if(!mx){fq.appendChild(el('div','note','Send a few messages to see the ciphertext letter counts.'));}
+  else{
+    const bars=el('div','freq');cnt.forEach(n=>{const b=el('div');b.style.height=(n/mx*100)+'%';b.title=n;bars.appendChild(b);});
+    const lab=el('div','flab');[...A].forEach(c=>lab.appendChild(el('span','',c)));
+    fq.append(bars,lab);
+    fq.appendChild(el('div','note','Substitution keeps letter frequencies, just relabelled. That is how these ciphers get broken.'));
+  }
+
+  // 4. brute force
+  const ck2=$('labCrack');ck2.innerHTML='';
+  if(cname!=='caesar') ck2.appendChild(el('div','note','Brute force only works on Caesar (just 26 keys). Switch the cipher to Caesar to try it. Vigenère and monoalphabetic need frequency analysis.'));
+  else if(!last) ck2.appendChild(el('div','note','Send a message first.'));
+  else{
+    ck2.appendChild(el('div','note','Trying every shift on: '+last.ct));
+    const box=el('div','crack');const right=mod(parseInt(key)||0,26);
+    for(let s=0;s<26;s++){const r=el('div',s===right?'hit':'','shift '+String(s).padStart(2,' ')+': '+CIPHERS.caesar.dec(last.ct,s));box.appendChild(r);}
+    ck2.appendChild(box);
+  }
 }
 
 /* ============ SENDING ============ */
@@ -386,27 +524,25 @@ $('text').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 let lastTyping=0;
 function updatePreview(){
   const t=$('text').value;
-  $('preview').textContent=t?'Encrypts to: '+CIPHERS[$('cipher').value].enc(t,$('key').value):'';
+  $('preview').textContent=t?'🔒 '+CIPHERS[$('cipher').value].enc(t,$('key').value):'';
+  updateLab();
 }
 $('text').addEventListener('input',()=>{
   updatePreview();
-  if(Date.now()-lastTyping>1500){
-    socket.emit('typing',{to:active==='main'?null:chats[active].name});lastTyping=Date.now();
-  }
+  if(Date.now()-lastTyping>1500){socket.emit('typing',{to:active==='main'?null:chats[active].name});lastTyping=Date.now();}
 });
 $('key').addEventListener('input',()=>{updatePreview();renderMessages();});
 $('cipher').addEventListener('change',()=>{updatePreview();renderMessages();});
 
 /* ============ TOOLBAR ============ */
 $('wireBtn').onclick=()=>{
-  document.body.classList.toggle('showwire');
-  $('wireHint').textContent=document.body.classList.contains('showwire')
-    ?'· showing ciphertext (what the server sees)':'· click 🔒 to show ciphertext';
+  const on=document.body.classList.toggle('eve');
+  $('wireBtn').classList.toggle('on',on);
+  $('wireHint').textContent=on?'· Eve sees only this ciphertext':'· 👁 shows what Eve (an eavesdropper) sees';
 };
-$('clearBtn').onclick=()=>{
-  chats[active].msgs=chats[active].msgs.filter(m=>m.banner);
-  renderMessages();
-};
+$('labBtn').onclick=()=>document.body.classList.toggle('labopen');
+$('labClose').onclick=()=>document.body.classList.remove('labopen');
+$('clearBtn').onclick=()=>{chats[active].msgs=chats[active].msgs.filter(m=>m.banner);renderMessages();};
 
 connect();
 </script>

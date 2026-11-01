@@ -149,9 +149,9 @@
     <h2>Messages the network can’t read.</h2>
     <p>Every message is scrambled with a classical substitution cipher in your browser before it travels. The server only ever relays ciphertext.</p>
     <div class="demo mono">
-      <div class="r"><span>plaintext</span><b>HELLO WORLD</b></div>
+      <div class="r"><span>plaintext</span><b>ROOM 204</b></div>
       <div class="arrow">↓ Caesar cipher, key = 5</div>
-      <div class="r"><span>on the wire</span><b>MJQQT BTWQI</b></div>
+      <div class="r"><span>on the wire</span><b>WTTR%759</b></div>
     </div>
   </div>
   <div class="form">
@@ -252,33 +252,52 @@
 /* ============ SUBSTITUTION CIPHERS ============ */
 const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const mod=(n,m)=>((n%m)+m)%m;
-function mapLetters(text,fn){
+// Three rings, so case is always recoverable and every character type is hidden:
+//   letters A-Z (26, case kept) · digits 0-9 (10) · space + punctuation (33)
+// Characters outside these (emoji, accents, other scripts) pass through unchanged.
+const SYM=' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
+function mapSymbols(text,onLetter,onDigit,onSym){
   return [...text].map(c=>{
     const u=c.toUpperCase(), i=A.indexOf(u);
-    if(i<0) return c;
-    const r=fn(i);
-    return c===u?r:r.toLowerCase();
+    if(i>=0){const r=onLetter(i);return c===u?r:r.toLowerCase();}
+    if(/^[0-9]$/.test(c)) return String(onDigit(+c));
+    const j=SYM.indexOf(c);
+    if(j>=0) return SYM[onSym(j)];
+    return c;
   }).join('');
 }
 const cleanKey=k=>k.toUpperCase().replace(/[^A-Z]/g,'');
+// Vigenère: every letter, digit and symbol consumes one key letter
 function vig(t,k,sign){
   k=cleanKey(k);
   if(!k) return t;
   let j=0;
-  return mapLetters(t,i=>A[mod(i+sign*(k.charCodeAt(j++%k.length)-65),26)]);
+  const sh=()=>k.charCodeAt(j++%k.length)-65;
+  return mapSymbols(t,i=>A[mod(i+sign*sh(),26)],d=>mod(d+sign*sh(),10),x=>mod(x+sign*sh(),SYM.length));
 }
 const keyedAlphabet=w=>[...new Set([...(cleanKey(w)+A)])].join('');
+// Keyed permutation of 0..n-1: key letters (char code mod n) first, then the rest in order
+function keyedRing(w,n){
+  const seen=[];
+  for(const ch of cleanKey(w)){const d=ch.charCodeAt(0)%n;if(!seen.includes(d))seen.push(d);}
+  for(let d=0;d<n;d++) if(!seen.includes(d)) seen.push(d);
+  return seen;
+}
+const keyedDigits=w=>keyedRing(w,10);
+const keyedSyms=w=>keyedRing(w,SYM.length);
 const CIPHERS={
-  caesar:{enc:(t,k)=>{const s=parseInt(k)||0;return mapLetters(t,i=>A[mod(i+s,26)]);},
-          dec:(t,k)=>{const s=parseInt(k)||0;return mapLetters(t,i=>A[mod(i-s,26)]);}},
+  caesar:{
+    enc:(t,k)=>{const s=parseInt(k)||0;return mapSymbols(t,i=>A[mod(i+s,26)],d=>mod(d+s,10),x=>mod(x+s,SYM.length));},
+    dec:(t,k)=>{const s=parseInt(k)||0;return mapSymbols(t,i=>A[mod(i-s,26)],d=>mod(d-s,10),x=>mod(x-s,SYM.length));}},
   vigenere:{enc:(t,k)=>vig(t,k,1),dec:(t,k)=>vig(t,k,-1)},
-  mono:{enc:(t,k)=>{const K=keyedAlphabet(k);return mapLetters(t,i=>K[i]);},
-        dec:(t,k)=>{const K=keyedAlphabet(k);return mapLetters(t,i=>A[K.indexOf(A[i])]);}}
+  mono:{
+    enc:(t,k)=>{const K=keyedAlphabet(k),D=keyedDigits(k),S=keyedSyms(k);return mapSymbols(t,i=>K[i],d=>D[d],x=>S[x]);},
+    dec:(t,k)=>{const K=keyedAlphabet(k),D=keyedDigits(k),S=keyedSyms(k);return mapSymbols(t,i=>A[K.indexOf(A[i])],d=>D.indexOf(d),x=>S.indexOf(x));}}
 };
 
 // Returns a message if the key doesn't suit the cipher (otherwise text would go out unencrypted)
 function keyProblem(cname,key){
-  if(cname==='caesar'&&!/^\s*-?\d+\s*$/.test(key)) return 'Caesar needs a number key, e.g. 5';
+  if(cname==='caesar'){const n=parseInt(key);if(!/^\s*\d+\s*$/.test(key)||n<1||n>25) return 'Caesar needs a whole number from 1 to 25, e.g. 5';}
   if(cname==='vigenere'&&!cleanKey(key)) return 'Vigenère needs a keyword with letters, e.g. SECRET';
   if(cname==='mono'&&!cleanKey(key)) return 'Monoalphabetic needs a keyword with letters, e.g. SECRET';
   return '';
@@ -491,6 +510,12 @@ function updateLab(){
     [...A].forEach((ch,i)=>{const d=el('div');d.appendChild(el('b','',ch));d.appendChild(el('i','',K[i]));g.appendChild(d);});
     mp.appendChild(g);
     mp.appendChild(el('div','note','Top: plaintext letter. Bottom (cyan): what it becomes.'));
+    const dm=cname==='caesar'?Array.from({length:10},(_,d)=>mod(d+(parseInt(key)||0),10)):keyedDigits(key);
+    const dg=el('div','map');dg.style.cssText='grid-template-columns:repeat(10,1fr);margin-top:8px';
+    dm.forEach((v,d)=>{const x=el('div');x.appendChild(el('b','',String(d)));x.appendChild(el('i','',String(v)));dg.appendChild(x);});
+    mp.appendChild(dg);
+    const spc=C.enc(' ',key);
+    mp.appendChild(el('div','note','Digits 0-9 are substituted too. Spaces and punctuation are also hidden (33 symbols)'+(spc!==' '?', e.g. space becomes "'+spc+'"':'')+'.'));
   }
 
   // 3. frequency
